@@ -1,3 +1,7 @@
+/*
+Transcribed code from CG Spectrum Module 02 Chapter 02
+*/
+
 #include <iostream>
 #include <conio.h>
 
