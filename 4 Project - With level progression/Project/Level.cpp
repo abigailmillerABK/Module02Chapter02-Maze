@@ -221,30 +221,34 @@ PlacableActor* Level::UpdateActors(int x, int y)
 	PlacableActor* collidedActor = nullptr;
 
 	for (auto actor = m_pActors.begin(); actor != m_pActors.end(); ++actor)
-	{
-		if ((*actor)->GetType() == ActorType::Enemy) {
-			//Check whether movement is safe
-			Enemy* thisEnemy = static_cast<Enemy*>(*actor);
-			int newX = thisEnemy->GetNextX();
-			int newY = thisEnemy->GetNextY();
-			bool isClear = true;
-			for (auto intersect = m_pActors.begin(); intersect != m_pActors.end(); ++intersect) {
-				if ((*intersect)->GetType() == ActorType::Box &&
-					(*intersect)->GetXPosition() == newX && (*intersect)->GetYPosition() == newY) {
-					isClear = false;
-				}
+	{	
+		//bool isClear = true;
+		(*actor)->Update(); // Update all actors
+		int newX = (*actor)->GetXPosition();
+		int newY = (*actor)->GetYPosition();
+
+		//Enemy and Block are destroyed on collision
+		for (auto intersect = m_pActors.begin(); intersect != m_pActors.end(); ++intersect) {
+			PlacableActor* interObj = static_cast<PlacableActor*>(*intersect);
+			if ((((* actor)->GetType() == ActorType::Box && (*intersect)->GetType() == ActorType::Enemy) ||
+				((*actor)->GetType() == ActorType::Enemy && (*intersect)->GetType() == ActorType::Box)) &&
+				newX == (*intersect)->GetXPosition() && newY == (*intersect)->GetYPosition()) {
+				(*intersect)->Remove();
+				(*actor)->Remove();
+				clearSpace(newX, newY);
+				m_pActors.shrink_to_fit();
+				actor = m_pActors.begin();
+				intersect = ++actor;
+				break;
 			}
-			if (isClear == true) {
-				thisEnemy->Update();
-			}
-		}
-		else {
-			(*actor)->Update(); // Update all actors
-		}
+		}		
 
 		if (x == (*actor)->GetXPosition() && y == (*actor)->GetYPosition())
 		{
 			// should only be able to collide with one actor
+			//Occasionally crashing at this point in the code.
+			//Adding breakpoint to analyze cause
+			//The call stack window shows that this error happens during collision checks
 			assert(collidedActor == nullptr);
 			collidedActor = (*actor);
 		}
