@@ -215,44 +215,23 @@ int Level::GetIndexFromCoordinates(int x, int y)
 	return x + y * m_width;
 }
 
-// Updates all actors and returns a colliding actor if there is one
-PlacableActor* Level::UpdateActors(int x, int y)
-{
+PlacableActor* Level::GetCollider(PlacableActor* actor, int x, int y) {
 	PlacableActor* collidedActor = nullptr;
 
-	for (auto actor = m_pActors.begin(); actor != m_pActors.end(); ++actor)
-	{	
-		//bool isClear = true;
-		(*actor)->Update(); // Update all actors
-		int newX = (*actor)->GetXPosition();
-		int newY = (*actor)->GetYPosition();
+	int newX = (actor)->GetXPosition();
+	int newY = (actor)->GetYPosition();
 
-		//Enemy and Block are destroyed on collision
-		for (auto intersect = m_pActors.begin(); intersect != m_pActors.end(); ++intersect) {
-			PlacableActor* interObj = static_cast<PlacableActor*>(*intersect);
-			if ((((* actor)->GetType() == ActorType::Box && (*intersect)->GetType() == ActorType::Enemy) ||
-				((*actor)->GetType() == ActorType::Enemy && (*intersect)->GetType() == ActorType::Box)) &&
-				newX == (*intersect)->GetXPosition() && newY == (*intersect)->GetYPosition()) {
-				(*intersect)->Remove();
-				(*actor)->Remove();
-				clearSpace(newX, newY);
-				m_pActors.shrink_to_fit();
-				actor = m_pActors.begin();
-				intersect = ++actor;
-				break;
-			}
-		}		
-
-		if (x == (*actor)->GetXPosition() && y == (*actor)->GetYPosition())
-		{
-			// should only be able to collide with one actor
-			//Occasionally crashing at this point in the code.
-			//Adding breakpoint to analyze cause
-			//The call stack window shows that this error happens during collision checks
-			assert(collidedActor == nullptr);
-			collidedActor = (*actor);
-		}
+	if (x == (actor)->GetXPosition() && y == (actor)->GetYPosition())
+	{
+		assert(collidedActor == nullptr);
+		collidedActor = actor;
 	}
 
 	return collidedActor;
+}
+
+PlacableActor* Level::UpdateActor(PlacableActor* actor, int x, int y)
+{	
+	(actor)->Update(); // Update all actors
+	return GetCollider((actor), x, y);			
 } 
