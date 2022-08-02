@@ -30,10 +30,12 @@ public:
 
 	virtual void Enter() override;
 	virtual bool Update(bool processInput = true) override;
+	void MovePlayer(int x, int y);
+	void LoseGame();
 	virtual void Draw() override;
 
 private:
-	void HandleCollision(int newPlayerX, int newPlayerY);
+	void HandleCollision(int newX, int newY);
 	bool Load();
 	void DrawHUD(const HANDLE& console);
 };

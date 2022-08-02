@@ -1,6 +1,8 @@
 #include <iostream>
 #include <windows.h>
 #include "Door.h"
+#include "AudioManager.h"
+#include "Player.h"
 
 Door::Door(int x, int y, ActorColor color, ActorColor closedColor)
 	: PlacableActor(x, y, color)
@@ -23,4 +25,24 @@ void Door::Draw()
 	}
 	std::cout << "|";
 	SetConsoleTextAttribute(console, (int)ActorColor::Regular);
+}
+
+bool Door::CollideWith(PlacableActor* actor){
+	if (actor->GetType() == ActorType::Player) {
+		Player* player = dynamic_cast<Player*>(actor);
+		if (player->HasKey(GetColor()))
+		{
+			Open();
+			Remove();
+			player->UseKey();
+			AudioManager::GetInstance()->PlayDoorOpenSound();
+			return true;
+		}
+		else
+		{
+			AudioManager::GetInstance()->PlayDoorClosedSound();
+			return false;
+		}
+	}
+	
 }

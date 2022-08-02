@@ -39,10 +39,12 @@ public:
 
 	void Remove() { m_IsActive = false; }
 	bool IsActive() { return m_IsActive; }
+	bool doesMove;
 	void Place(int x, int y);
 
 	virtual ActorType GetType() = 0;
 	virtual void Draw() = 0;
+	virtual bool CollideWith(PlacableActor* actor) = 0;
 	virtual void Update()
 	{
 

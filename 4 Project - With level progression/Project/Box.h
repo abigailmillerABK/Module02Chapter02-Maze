@@ -7,4 +7,6 @@ public:
 
 	virtual ActorType GetType() override { return ActorType::Box; }
 	virtual void Draw() override;
+	bool CollideWith(PlacableActor* actor) { return true; }
+	bool doesMove = true;
 };

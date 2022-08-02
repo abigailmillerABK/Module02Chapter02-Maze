@@ -1,5 +1,8 @@
 #include "Enemy.h"
 #include <iostream>
+#include "AudioManager.h"
+#include "StateMachineExampleGame.h"
+#include "Player.h"
 
 Enemy::Enemy(int x, int y, int deltaX, int deltaY)
 	: PlacableActor(x, y)
@@ -28,6 +31,16 @@ void Enemy::InitDirection()
 void Enemy::Draw()
 {
 	std::cout << (char)153;
+}
+
+bool Enemy::CollideWith(PlacableActor* actor) {
+	AudioManager::GetInstance()->PlayLoseLivesSound();
+	Remove();
+	if (actor->GetType() == ActorType::Player) {
+		Player* player = dynamic_cast<Player*>(actor);
+		player->DecrementLives();
+		return true;
+	}
 }
 
 void Enemy::Update()

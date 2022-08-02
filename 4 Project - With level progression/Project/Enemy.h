@@ -7,9 +7,11 @@ public:
 
 	virtual ActorType GetType() override { return ActorType::Enemy; }
 	virtual void Draw() override;
+	virtual bool CollideWith(PlacableActor* actor) override;
 	virtual void Update() override;
 	int GetNextX();
 	int GetNextY();
+	bool doesMove = true;
 
 protected:
 	void InitDirection();

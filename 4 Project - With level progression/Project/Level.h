@@ -10,11 +10,13 @@ class Level
 	int m_height;
 	int m_width;
 
-	std::vector<PlacableActor*> m_pActors;
+	
 
 public:
 	Level();
 	~Level();
+
+	std::vector<PlacableActor*> m_pActors;
 
 	bool Load(std::string levelName, int* playerX, int* playerY);
 	void Draw();
