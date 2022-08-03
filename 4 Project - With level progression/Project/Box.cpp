@@ -11,8 +11,6 @@ Box::Box(int x, int y)
 }
 
 bool Box::CollideWith(PlacableActor* actor) {
-	AudioManager::GetInstance()->PlayLoseLivesSound();
-	Remove();
 	if (actor->GetType() == ActorType::Enemy) {
 		Enemy* enemy = dynamic_cast<Enemy*>(actor);
 		enemy->ChangeDirection();

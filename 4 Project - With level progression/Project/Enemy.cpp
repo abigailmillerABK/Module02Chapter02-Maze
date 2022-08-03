@@ -76,18 +76,17 @@ int Enemy::GetNextY() {
 
 int Enemy::UpdateDirection(int& current, int& direction, int& movement)
 {
-	int curPosit = current + direction;
 	current += direction;
-	if (std::abs(curPosit) > movement)
+
+	if (std::abs(current) > movement)
 	{
-		curPosit = movement * direction;
+		current = movement * direction;
 		direction *= -1;
 	}
-	return curPosit;
+
+	return current;
 }
 
 void Enemy::ChangeDirection() {
-	m_directionX *= -1;
-	m_directionY *= -1;
 }
 

@@ -117,12 +117,7 @@ bool GameplayState::Update(bool processInput)
 			for (PlacableActor* thisActor : m_pLevel->m_pActors) {
 				if (thisActor->GetType() == ActorType::Enemy) {
 					Enemy* enemy = dynamic_cast<Enemy*>(thisActor);
-					if (HandleCollision(enemy, enemy->GetNextX(), enemy->GetNextY())) {
-						//m_pLevel->UpdateActor(enemy);
-					}
-					else {
-						//enemy->ChangeDirection();
-					}
+					HandleCollision(enemy, enemy->GetNextX(), enemy->GetNextY());
 				}
 				else {
 					m_pLevel->UpdateActor(thisActor);
@@ -233,22 +228,31 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 		}
 		case ActorType::Box:
 		{
-			Box* collidedBox = dynamic_cast<Box*>(collidedActor);
-			assert(collidedBox);
-			collidedBox->CollideWith(actor);
-			int difX = newX - m_player.GetXPosition();
-			int difY = newY - m_player.GetYPosition();
-			int newBoxX = collidedBox->GetXPosition() + difX;
-			int newBoxY = collidedBox->GetYPosition() + difY;
-			//collidedActor = m_pLevel->UpdateActors(newBoxX, newBoxY);
-			if (HandleCollision(collidedBox, newBoxX, newBoxY)) { //If there is an empty space
-				MoveActor(collidedBox, newBoxX, newBoxY);
-				return MoveActor(actor, newX, newY);
+			if (actor->GetType() == ActorType::Player) {
+				Box* collidedBox = dynamic_cast<Box*>(collidedActor);
+				assert(collidedBox);
+				//collidedBox->CollideWith(actor);
+				int difX = newX - m_player.GetXPosition();
+				int difY = newY - m_player.GetYPosition();
+				int newBoxX = collidedBox->GetXPosition() + difX;
+				int newBoxY = collidedBox->GetYPosition() + difY;
+				//collidedActor = m_pLevel->UpdateActors(newBoxX, newBoxY);
+				if (HandleCollision(collidedBox, newBoxX, newBoxY)) { //If there is an empty space
+					//MoveActor(collidedBox, newBoxX, newBoxY);
+					return MoveActor(actor, newX, newY);
+				}
+				else if (collidedActor != nullptr && collidedActor->IsActive()) {
+					return false;
+				}
+				break;
 			}
-			else if (collidedActor != nullptr && collidedActor->IsActive()) {
+			else {
+				if (actor->GetType() == ActorType::Enemy) {
+					Enemy* enemy = dynamic_cast<Enemy*>(actor);
+					enemy->ChangeDirection();
+				}
 				return false;
 			}
-			break;
 		}
 		case ActorType::Goal:
 		{
