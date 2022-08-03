@@ -15,7 +15,7 @@ Player::Player()
 	, m_money(0)
 	, m_lives(kStartingNumberOfLives)
 {
-
+	doesMove = true;
 }
 
 bool Player::HasKey()

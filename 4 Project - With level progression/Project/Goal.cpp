@@ -4,7 +4,7 @@
 Goal::Goal(int x, int y)
 	: PlacableActor(x, y)
 {
-	
+	doesMove = false;
 }
 
 void Goal::Draw()

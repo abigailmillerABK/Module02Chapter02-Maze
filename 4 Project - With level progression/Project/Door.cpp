@@ -9,7 +9,7 @@ Door::Door(int x, int y, ActorColor color, ActorColor closedColor)
 	, m_isOpen(false)
 	, m_closedColor(closedColor)
 {
-
+	doesMove = false;
 }
 
 void Door::Draw()

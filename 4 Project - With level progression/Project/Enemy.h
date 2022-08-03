@@ -11,7 +11,7 @@ public:
 	virtual void Update() override;
 	int GetNextX();
 	int GetNextY();
-	bool doesMove = true;
+	void ChangeDirection();
 
 protected:
 	void InitDirection();
@@ -27,6 +27,8 @@ private:
 	int m_directionY;
 
 	int UpdateDirection(int& current, int& direction, int& movement);
+
+	
 
 };
 

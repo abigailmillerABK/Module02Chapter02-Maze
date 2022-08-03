@@ -12,7 +12,6 @@ public:
 	virtual ActorType GetType() override { return ActorType::Door;  }
 	bool IsOpen() { return m_isOpen;  }
 	void Open() { m_isOpen = true; }
-	bool doesMove = false;
 
 private:
 	bool m_isOpen;

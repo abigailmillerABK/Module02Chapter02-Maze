@@ -24,7 +24,6 @@ public:
 	virtual ActorType GetType() override { return ActorType::Player; }
 	virtual void Draw() override;
 	bool CollideWith(PlacableActor* actor) { return true; }
-	bool doesMove = true;
 
 private:
 	Key* m_pCurrentKey;

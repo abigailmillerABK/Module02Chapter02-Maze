@@ -10,7 +10,6 @@ public:
 	virtual ActorType GetType() override { return ActorType::Money; }
 	virtual void Draw() override;
 	bool CollideWith(PlacableActor* actor) override;
-	bool doesMove = false;
 private:
 	int m_worth;
 };

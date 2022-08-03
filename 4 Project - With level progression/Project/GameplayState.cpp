@@ -113,7 +113,13 @@ bool GameplayState::Update(bool processInput)
 		}
 		else
 		{
-			HandleCollision(newPlayerX, newPlayerY);
+			m_pLevel->UpdateActors();
+			for (auto actor : m_pLevel->m_pActors) {
+				if (actor->doesMove == true) {
+					HandleCollision(actor, newPlayerX, newPlayerY);
+				}
+			}
+			
 		}
 	}
 	if (m_beatLevel)
@@ -144,9 +150,10 @@ bool GameplayState::Update(bool processInput)
 	return false;
 }
 
-void GameplayState::MovePlayer(int x, int y) {
+bool GameplayState::MovePlayer(int x, int y) {
 	m_pLevel->clearSpace(x, y);
 	m_player.SetPosition(x, y);
+	return true;
 }
 
 void GameplayState::LoseGame() {
@@ -154,110 +161,107 @@ void GameplayState::LoseGame() {
 	m_pOwner->LoadScene(StateMachineExampleGame::SceneName::Lose);
 }
 
-void GameplayState::HandleCollision(int newX, int newY)
+bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 {
-	std::vector<PlacableActor*>::iterator actorPtr;
-	for (actorPtr = m_pLevel->m_pActors.begin(); actorPtr != m_pLevel->m_pActors.end(); actorPtr++) {
-		PlacableActor* collidedActor = m_pLevel->UpdateActor((*actorPtr), newX, newY);
-		if ((*actorPtr)->doesMove == true) {			
-			PlacableActor* playerActor = (*actorPtr);
-			if (collidedActor != nullptr && collidedActor->IsActive())
+	PlacableActor* collidedActor = m_pLevel->GetCollider(newX, newY);
+	if (collidedActor != nullptr && collidedActor->IsActive())
+	{
+		switch (collidedActor->GetType())
+		{
+		case ActorType::Enemy:
+		{
+			Enemy* collidedEnemy = dynamic_cast<Enemy*>(collidedActor);
+			assert(collidedEnemy);
+			if (collidedEnemy->CollideWith(actor)) {
+				if (m_player.GetLives() < 0)
+				{
+					LoseGame();
+				}
+				return MovePlayer(newX, newY);
+			}
+			return false;
+			break;
+		}
+		case ActorType::Money:
+		{
+			Money* collidedMoney = dynamic_cast<Money*>(collidedActor);
+			assert(collidedMoney);
+			if (collidedMoney->CollideWith(actor)) {
+				return MovePlayer(newX, newY);
+			}
+			break;
+		}
+		case ActorType::Key:
+		{
+			Key* collidedKey = dynamic_cast<Key*>(collidedActor);
+			assert(collidedKey);
+			if (!m_player.HasKey())
 			{
-				switch (collidedActor->GetType())
-				{
-				case ActorType::Enemy:
-				{
-					Enemy* collidedEnemy = dynamic_cast<Enemy*>(collidedActor);
-					assert(collidedEnemy);
-					if (collidedEnemy->CollideWith(playerActor)) {
-						MovePlayer(newX, newY);
-					}
-					if (m_player.GetLives() < 0)
-					{
-						LoseGame();
-					}
-					break;
-				}
-				case ActorType::Money:
-				{
-					Money* collidedMoney = dynamic_cast<Money*>(collidedActor);
-					assert(collidedMoney);
-					if (collidedMoney->CollideWith(playerActor)) {
-						MovePlayer(newX, newY);
-					}
-					break;
-				}
-				case ActorType::Key:
-				{
-					Key* collidedKey = dynamic_cast<Key*>(collidedActor);
-					assert(collidedKey);
-					if (!m_player.HasKey())
-					{
-						if (collidedKey->CollideWith(playerActor)) {
-							MovePlayer(newX, newY);
-						}
-					}
-					break;
-				}
-				case ActorType::Door:
-				{
-					Door* collidedDoor = dynamic_cast<Door*>(collidedActor);
-					assert(collidedDoor);
-					if (!collidedDoor->IsOpen())
-					{
-						if (collidedDoor->CollideWith(playerActor)) {
-							MovePlayer(newX, newY);
-						}
-					}
-					else
-					{
-						m_player.SetPosition(newX, newY);
-					}
-					break;
-				}
-				case ActorType::Box:
-				{
-					Box* collidedBox = dynamic_cast<Box*>(collidedActor);
-					assert(collidedBox);
-					collidedBox->CollideWith(playerActor);
-					int difX = newX - m_player.GetXPosition();
-					int difY = newY - m_player.GetYPosition();
-					int newBoxX = collidedBox->GetXPosition() + difX;
-					int newBoxY = collidedBox->GetYPosition() + difY;
-					//collidedActor = m_pLevel->UpdateActors(newBoxX, newBoxY);
-					if (collidedActor != nullptr && collidedActor->IsActive()) {
-						break;
-					}
-					else if (m_pLevel->IsSpace(newBoxX, newBoxY)) {
-						collidedBox->SetPosition(newBoxX, newBoxY);
-						MovePlayer(newX, newY);
-					}
-					break;
-				}
-				case ActorType::Goal:
-				{
-					Goal* collidedGoal = dynamic_cast<Goal*>(collidedActor);
-					assert(collidedGoal);
-					collidedGoal->Remove();
-					MovePlayer(newX, newY);
-					m_beatLevel = true;
-					break;
-				}
-				default:
-					break;
+				if (collidedKey->CollideWith(actor)) {
+					return MovePlayer(newX, newY);
 				}
 			}
-			else if (m_pLevel->IsSpace(newX, newY)) // no collision
+			break;
+		}
+		case ActorType::Door:
+		{
+			Door* collidedDoor = dynamic_cast<Door*>(collidedActor);
+			assert(collidedDoor);
+			if (!collidedDoor->IsOpen())
 			{
-				MovePlayer(newX, newY);
+				if (collidedDoor->CollideWith(actor)) {
+					return MovePlayer(newX, newY);
+				}
+				else {
+					return false;
+				}
 			}
-			else if (m_pLevel->IsWall(newX, newY))
+			else
 			{
-				// wall collision, do nothing
+				return MovePlayer(newX, newY);
 			}
+			break;
+		}
+		case ActorType::Box:
+		{
+			Box* collidedBox = dynamic_cast<Box*>(collidedActor);
+			assert(collidedBox);
+			collidedBox->CollideWith(actor);
+			int difX = newX - m_player.GetXPosition();
+			int difY = newY - m_player.GetYPosition();
+			int newBoxX = collidedBox->GetXPosition() + difX;
+			int newBoxY = collidedBox->GetYPosition() + difY;
+			//collidedActor = m_pLevel->UpdateActors(newBoxX, newBoxY);
+			if (HandleCollision(collidedBox, newBoxX, newBoxY)) {
+				collidedBox->SetPosition(newBoxX, newBoxY);
+				return MovePlayer(newX, newY);
+			}
+			else if (collidedActor != nullptr && collidedActor->IsActive()) {
+				return false;
+			}
+			break;
+		}
+		case ActorType::Goal:
+		{
+			Goal* collidedGoal = dynamic_cast<Goal*>(collidedActor);
+			assert(collidedGoal);
+			collidedGoal->Remove();
+			m_beatLevel = true;
+			return MovePlayer(newX, newY);
+			break;
+		}
+		default:
+			break;
 		}
 	}
-
+	else if (m_pLevel->IsSpace(newX, newY)) // no collision
+	{
+		return MovePlayer(newX, newY);
+	}
+	else if (m_pLevel->IsWall(newX, newY))
+	{
+		return false;
+	}
 }
 
 void GameplayState::Draw()

@@ -8,6 +8,5 @@ public:
 	virtual ActorType GetType() override { return ActorType::Goal; }
 	virtual void Draw() override;
 	bool CollideWith(PlacableActor* actor) { return true; }
-	bool doesMove = false;
 };
 

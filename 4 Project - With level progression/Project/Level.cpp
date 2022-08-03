@@ -215,23 +215,22 @@ int Level::GetIndexFromCoordinates(int x, int y)
 	return x + y * m_width;
 }
 
-PlacableActor* Level::GetCollider(PlacableActor* actor, int x, int y) {
+PlacableActor* Level::GetCollider(int x, int y) {
 	PlacableActor* collidedActor = nullptr;
 
-	int newX = (actor)->GetXPosition();
-	int newY = (actor)->GetYPosition();
-
-	if (x == (actor)->GetXPosition() && y == (actor)->GetYPosition())
-	{
-		assert(collidedActor == nullptr);
-		collidedActor = actor;
+	for (auto actor : this->m_pActors) {
+		if (x == (actor)->GetXPosition() && y == (actor)->GetYPosition())
+		{
+			collidedActor = actor;
+			return collidedActor; //Will only return one thing
+		}
 	}
-
-	return collidedActor;
+	return nullptr;
 }
 
-PlacableActor* Level::UpdateActor(PlacableActor* actor, int x, int y)
+void Level::UpdateActors()
 {	
-	(actor)->Update(); // Update all actors
-	return GetCollider((actor), x, y);			
+	for (auto actor : this->m_pActors) {
+		(actor)->Update(); // Update all actors
+	}		
 } 

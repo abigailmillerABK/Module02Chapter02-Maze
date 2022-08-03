@@ -14,6 +14,7 @@ Enemy::Enemy(int x, int y, int deltaX, int deltaY)
 	, m_movementInY(deltaY)
 {
 	InitDirection();
+	doesMove = true;
 }
 
 void Enemy::InitDirection()
@@ -40,6 +41,12 @@ bool Enemy::CollideWith(PlacableActor* actor) {
 		Player* player = dynamic_cast<Player*>(actor);
 		player->DecrementLives();
 		return true;
+	}
+	else {
+	//switch directions
+		m_directionX *= -1;
+		m_directionY *= -1;
+		return false;
 	}
 }
 
@@ -75,5 +82,10 @@ int Enemy::UpdateDirection(int& current, int& direction, int& movement)
 		direction *= -1;
 	}
 	return curPosit;
+}
+
+void Enemy::ChangeDirection() {
+	m_directionX *= -1;
+	m_directionY *= -1;
 }
 
