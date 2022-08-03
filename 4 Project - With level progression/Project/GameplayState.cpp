@@ -113,10 +113,19 @@ bool GameplayState::Update(bool processInput)
 		}
 		else
 		{
-			m_pLevel->UpdateActors();
-			for (auto actor : m_pLevel->m_pActors) {
-				if (actor->doesMove == true) {
-					HandleCollision(actor, newPlayerX, newPlayerY);
+			HandleCollision(&m_player, newPlayerX, newPlayerY);
+			for (PlacableActor* thisActor : m_pLevel->m_pActors) {
+				if (thisActor->GetType() == ActorType::Enemy) {
+					Enemy* enemy = dynamic_cast<Enemy*>(thisActor);
+					if (HandleCollision(enemy, enemy->GetNextX(), enemy->GetNextY())) {
+						//m_pLevel->UpdateActor(enemy);
+					}
+					else {
+						//enemy->ChangeDirection();
+					}
+				}
+				else {
+					m_pLevel->UpdateActor(thisActor);
 				}
 			}
 			
@@ -150,9 +159,9 @@ bool GameplayState::Update(bool processInput)
 	return false;
 }
 
-bool GameplayState::MovePlayer(int x, int y) {
+bool GameplayState::MoveActor(PlacableActor* actor, int x, int y) {
 	m_pLevel->clearSpace(x, y);
-	m_player.SetPosition(x, y);
+	actor->SetPosition(x, y);
 	return true;
 }
 
@@ -177,7 +186,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 				{
 					LoseGame();
 				}
-				return MovePlayer(newX, newY);
+				return MoveActor(actor, newX, newY);
 			}
 			return false;
 			break;
@@ -187,7 +196,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 			Money* collidedMoney = dynamic_cast<Money*>(collidedActor);
 			assert(collidedMoney);
 			if (collidedMoney->CollideWith(actor)) {
-				return MovePlayer(newX, newY);
+				return MoveActor(actor, newX, newY);
 			}
 			break;
 		}
@@ -198,7 +207,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 			if (!m_player.HasKey())
 			{
 				if (collidedKey->CollideWith(actor)) {
-					return MovePlayer(newX, newY);
+					return MoveActor(actor, newX, newY);
 				}
 			}
 			break;
@@ -210,7 +219,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 			if (!collidedDoor->IsOpen())
 			{
 				if (collidedDoor->CollideWith(actor)) {
-					return MovePlayer(newX, newY);
+					return MoveActor(actor, newX, newY);
 				}
 				else {
 					return false;
@@ -218,7 +227,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 			}
 			else
 			{
-				return MovePlayer(newX, newY);
+				return MoveActor(actor, newX, newY);
 			}
 			break;
 		}
@@ -232,9 +241,9 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 			int newBoxX = collidedBox->GetXPosition() + difX;
 			int newBoxY = collidedBox->GetYPosition() + difY;
 			//collidedActor = m_pLevel->UpdateActors(newBoxX, newBoxY);
-			if (HandleCollision(collidedBox, newBoxX, newBoxY)) {
-				collidedBox->SetPosition(newBoxX, newBoxY);
-				return MovePlayer(newX, newY);
+			if (HandleCollision(collidedBox, newBoxX, newBoxY)) { //If there is an empty space
+				MoveActor(collidedBox, newBoxX, newBoxY);
+				return MoveActor(actor, newX, newY);
 			}
 			else if (collidedActor != nullptr && collidedActor->IsActive()) {
 				return false;
@@ -247,7 +256,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 			assert(collidedGoal);
 			collidedGoal->Remove();
 			m_beatLevel = true;
-			return MovePlayer(newX, newY);
+			return MoveActor(actor, newX, newY);
 			break;
 		}
 		default:
@@ -256,7 +265,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 	}
 	else if (m_pLevel->IsSpace(newX, newY)) // no collision
 	{
-		return MovePlayer(newX, newY);
+		return MoveActor(actor, newX, newY);
 	}
 	else if (m_pLevel->IsWall(newX, newY))
 	{

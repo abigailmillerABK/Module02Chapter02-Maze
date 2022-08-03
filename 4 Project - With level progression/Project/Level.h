@@ -22,7 +22,7 @@ public:
 	void Draw();
 	void clearSpace(int x, int y);
 	PlacableActor* GetCollider(int x, int y);
-	void UpdateActors();
+	void UpdateActor(PlacableActor* actor);
 
 	bool IsSpace(int x, int y);
 	bool IsWall(int x, int y);

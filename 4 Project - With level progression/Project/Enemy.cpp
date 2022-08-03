@@ -35,25 +35,27 @@ void Enemy::Draw()
 }
 
 bool Enemy::CollideWith(PlacableActor* actor) {
-	AudioManager::GetInstance()->PlayLoseLivesSound();
-	Remove();
-	if (actor->GetType() == ActorType::Player) {
-		Player* player = dynamic_cast<Player*>(actor);
-		player->DecrementLives();
-		return true;
-	}
-	else {
-	//switch directions
-		m_directionX *= -1;
-		m_directionY *= -1;
-		return false;
-	}
+	return false;
 }
+//	AudioManager::GetInstance()->PlayLoseLivesSound();
+//	Remove();
+//	if (actor->GetType() == ActorType::Player) {
+//		Player* player = dynamic_cast<Player*>(actor);
+//		player->DecrementLives();
+//		return true;
+//	}
+//	else {
+//	//switch directions
+//		m_directionX *= -1;
+//		m_directionY *= -1;
+//		return false;
+//	}
+//}
 
 void Enemy::Update()
 {
-	m_currentMovementX = UpdateDirection(m_currentMovementX, m_directionX, m_movementInX);
-	m_currentMovementY = UpdateDirection(m_currentMovementY, m_directionY, m_movementInY);
+	//m_currentMovementX = UpdateDirection(m_currentMovementX, m_directionX, m_movementInX);
+	//m_currentMovementY = UpdateDirection(m_currentMovementY, m_directionY, m_movementInY);
 	this->SetPosition(GetNextX(), GetNextY());
 }
 int Enemy::GetNextX() {
@@ -75,7 +77,7 @@ int Enemy::GetNextY() {
 int Enemy::UpdateDirection(int& current, int& direction, int& movement)
 {
 	int curPosit = current + direction;
-	//current += direction;
+	current += direction;
 	if (std::abs(curPosit) > movement)
 	{
 		curPosit = movement * direction;

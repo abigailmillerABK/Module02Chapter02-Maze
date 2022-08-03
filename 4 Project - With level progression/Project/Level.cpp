@@ -228,9 +228,7 @@ PlacableActor* Level::GetCollider(int x, int y) {
 	return nullptr;
 }
 
-void Level::UpdateActors()
+void Level::UpdateActor(PlacableActor* actor)
 {	
-	for (auto actor : this->m_pActors) {
-		(actor)->Update(); // Update all actors
-	}		
+	(actor)->Update(); // Update all actors		
 } 

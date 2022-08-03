@@ -30,7 +30,7 @@ public:
 
 	virtual void Enter() override;
 	virtual bool Update(bool processInput = true) override;
-	bool MovePlayer(int x, int y);
+	bool MoveActor(PlacableActor* actor, int x, int y);
 	void LoseGame();
 	virtual void Draw() override;
 
