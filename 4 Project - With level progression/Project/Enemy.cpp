@@ -35,22 +35,15 @@ void Enemy::Draw()
 }
 
 bool Enemy::CollideWith(PlacableActor* actor) {
-	return false;
+
+	if (actor->GetType() == ActorType::Player) {
+		AudioManager::GetInstance()->PlayLoseLivesSound();
+		Remove();
+		Player* player = dynamic_cast<Player*>(actor);
+		player->DecrementLives();
+		return true;
+	}
 }
-//	AudioManager::GetInstance()->PlayLoseLivesSound();
-//	Remove();
-//	if (actor->GetType() == ActorType::Player) {
-//		Player* player = dynamic_cast<Player*>(actor);
-//		player->DecrementLives();
-//		return true;
-//	}
-//	else {
-//	//switch directions
-//		m_directionX *= -1;
-//		m_directionY *= -1;
-//		return false;
-//	}
-//}
 
 void Enemy::Update()
 {
@@ -88,5 +81,7 @@ int Enemy::UpdateDirection(int& current, int& direction, int& movement)
 }
 
 void Enemy::ChangeDirection() {
+	m_currentMovementX = m_movementInX;
+	m_currentMovementY = m_movementInY;
 }
 

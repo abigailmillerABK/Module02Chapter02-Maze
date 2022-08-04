@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "GameplayState.h"
 
 Game::Game()
 	: m_pStateMachine(nullptr)
@@ -18,14 +19,13 @@ void Game::Initialize(GameStateMachine* pStateMachine)
 void Game::RunGameLoop()
 {
 	bool isGameOver = false;
-
 	while (!isGameOver)
-	{
+	{		
 		// update with no input
 		Update(false);
 		// Draw
 		Draw();
-		// Update with input
+		// Update with input	
 		isGameOver = Update();
 	}
 

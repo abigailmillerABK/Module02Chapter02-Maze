@@ -29,6 +29,8 @@ public:
 	PlacableActor(int x, int y, ActorColor color = ActorColor::Regular);
 	virtual ~PlacableActor();
 
+	int nextX;
+	int nextY;
 	int GetXPosition();
 	int GetYPosition();
 	int* GetXPositionPointer();

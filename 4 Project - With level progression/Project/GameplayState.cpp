@@ -15,6 +15,7 @@
 #include "Utility.h"
 #include "StateMachineExampleGame.h"
 #include <list>
+#include <thread>
 
 using namespace std;
 
@@ -57,75 +58,90 @@ bool GameplayState::Load()
 
 }
 
+
 void GameplayState::Enter()
 {
 	Load();
+	input = std::thread(&GameplayState::GetInput, this);
+	shouldGetInput = true;
+}
+
+void GameplayState::Exit() {
+	shouldGetInput = false;
+	input.join();
+}
+
+void GameplayState::GetInput() {
+	while (shouldGetInput) {
+		inputKey = _getch();
+
+		if (inputKey == kArrowInput)
+		{
+			inputKey = _getch();
+		}
+	}
+	
+}
+
+
+void GameplayState::Collision() {
+	int arrowInput = 0;
+	int newPlayerX = m_player.GetXPosition();
+	int newPlayerY = m_player.GetYPosition();
+
+	if ((inputKey == kLeftArrow) ||
+		(char)inputKey == 'A' || (char)inputKey == 'a')
+	{
+		m_player.nextX--;
+	}
+	else if ((inputKey == kRightArrow) ||
+		(char)inputKey == 'D' || (char)inputKey == 'd')
+	{
+		m_player.nextX++;
+	}
+	else if ((inputKey == kUpArrow) ||
+		(char)inputKey == 'W' || (char)inputKey == 'w')
+	{
+		m_player.nextY--;
+	}
+	else if ((inputKey == kDownArrow) ||
+		(char)inputKey == 'S' || (char)inputKey == 's')
+	{
+		m_player.nextY++;
+	}
+	else if (inputKey == kEscapeKey)
+	{
+		m_pOwner->LoadScene(StateMachineExampleGame::SceneName::MainMenu);
+	}
+	else if ((char)inputKey == 'Z' || (char)inputKey == 'z')
+	{
+		m_player.DropKey();
+	}
+	HandleCollision(&m_player, m_player.nextX, m_player.nextY);
+	inputKey = 0;
+	//////////////////////////////////////////////
+	for (PlacableActor* thisActor : m_pLevel->m_pActors) {
+		if (thisActor->GetType() == ActorType::Enemy) {
+			Enemy* enemy = dynamic_cast<Enemy*>(thisActor);
+			if (!HandleCollision(enemy, enemy->GetNextX(), enemy->GetNextY())) {
+				//enemy->ChangeDirection();
+			}
+		}
+		else {
+			m_pLevel->UpdateActor(thisActor);
+		}
+	}
+	this_thread::sleep_for(chrono::milliseconds(100));
 }
 
 bool GameplayState::Update(bool processInput)
 {
+	
 	if (processInput && !m_beatLevel)
 	{
-		int input = _getch();
-		int arrowInput = 0;
-		int newPlayerX = m_player.GetXPosition();
-		int newPlayerY = m_player.GetYPosition();
-
-		// One of the arrow keys were pressed
-		if (input == kArrowInput)
-		{
-			arrowInput = _getch();
-		}
-
-		if ((input == kArrowInput && arrowInput == kLeftArrow) ||
-			(char)input == 'A' || (char)input == 'a')
-		{
-			newPlayerX--;
-		}
-		else if ((input == kArrowInput && arrowInput == kRightArrow) ||
-			(char)input == 'D' || (char)input == 'd')
-		{
-			newPlayerX++;
-		}
-		else if ((input == kArrowInput && arrowInput == kUpArrow) ||
-			(char)input == 'W' || (char)input == 'w')
-		{
-			newPlayerY--;
-		}
-		else if ((input == kArrowInput && arrowInput == kDownArrow) ||
-			(char)input == 'S' || (char)input == 's')
-		{
-			newPlayerY++;
-		}
-		else if (input == kEscapeKey)
-		{
-			m_pOwner->LoadScene(StateMachineExampleGame::SceneName::MainMenu);
-		}
-		else if ((char)input == 'Z' || (char)input == 'z')
-		{
-			m_player.DropKey();
-		}
-
-		// If position never changed
-		if (newPlayerX == m_player.GetXPosition() && newPlayerY == m_player.GetYPosition())
-		{
-			//return false;
-		}
-		else
-		{
-			HandleCollision(&m_player, newPlayerX, newPlayerY);
-			for (PlacableActor* thisActor : m_pLevel->m_pActors) {
-				if (thisActor->GetType() == ActorType::Enemy) {
-					Enemy* enemy = dynamic_cast<Enemy*>(thisActor);
-					HandleCollision(enemy, enemy->GetNextX(), enemy->GetNextY());
-				}
-				else {
-					m_pLevel->UpdateActor(thisActor);
-				}
-			}
-			
-		}
+		Collision();
 	}
+
 	if (m_beatLevel)
 	{
 		++m_skipFrameCount;
@@ -275,6 +291,7 @@ bool GameplayState::HandleCollision(PlacableActor* actor, int newX, int newY)
 	{
 		return false;
 	}
+	return false;
 }
 
 void GameplayState::Draw()
